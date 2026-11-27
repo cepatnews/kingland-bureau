@@ -58,6 +58,11 @@ const TASK_STATES = sel(["대기", "gray"], ["수신 확인", "blue"], ["진행"
 const PEOPLE_SEL = sel(["사단장(사용자)", "brown"], ["대장 피클", "red"], ["좌참 피클", "orange"], ["우참 피클", "green"]);
 
 const SPECS = {
+  "01": {
+    title: "01 설정",
+    description: "회사(조직) 이름·로고 같은 앱 설정. 앱 왼쪽 위 로고·이름을 눌러 바꿀 수 있습니다.",
+    props: { 항목: { title: {} }, 값: text },
+  },
   "02": {
     title: "02 조직도 및 역할",
     description: "AI 명단. 대장 피클 → 좌참 피클(Vermilion)·우참 피클(Sapphire) → 부대원. 강점·역량은 사단장이 직접 입력합니다.",
@@ -219,7 +224,7 @@ async function main() {
 
   const ids = {};
   const created = new Set();
-  for (const key of ["02", "04", "09", "05", "10"]) {
+  for (const key of ["01", "02", "04", "09", "05", "10"]) {
     if (existing.has(key)) {
       ids[key] = existing.get(key);
       console.log(`   ⏭️  ${SPECS[key].title} — 이미 있어서 건너뜀`);
@@ -260,6 +265,19 @@ async function main() {
       if (synced && synced !== dual) await notion(`/databases/${ids[to]}`, "PATCH", { properties: { [synced]: { name: dual } } });
     }
     console.log(`   🔗 ${SPECS[from].title} · ${name}${dual ? ` ↔ ${dual}` : ""}`);
+  }
+
+  // 01 설정 기본값 (비어 있을 때만): 회사 이름은 .env.local 의 NEXT_PUBLIC_ORG_NAME
+  const settingRows = await notion(`/databases/${ids["01"]}/query`, "POST", { page_size: 1 });
+  if (settingRows.results.length === 0) {
+    const orgName = process.env.NEXT_PUBLIC_ORG_NAME?.trim() || "KingLand Bureau";
+    for (const [key, value] of [["조직 이름", orgName], ["로고", ""]]) {
+      await notion("/pages", "POST", {
+        parent: { database_id: ids["01"] },
+        properties: { 항목: { title: [{ text: { content: key } }] }, 값: { rich_text: value ? [{ text: { content: value } }] : [] } },
+      });
+    }
+    console.log(`   🏷️  01 설정: 회사 이름 "${orgName}" (로고는 npm run set:brand 또는 앱에서)`);
   }
 
   // 기본 조직 채우기 (02가 비어 있을 때만)

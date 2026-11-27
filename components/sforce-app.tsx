@@ -11,13 +11,13 @@ import {
 } from "@/lib/types";
 import { AgentsPanel } from "./agents-panel";
 import { Conversation, useChatRoom } from "./commander-room";
+import { BrandHeader, useBrand } from "./brand";
 import { OfficeView, type OfficeViewMode } from "./office-view";
 import { workingAgents } from "@/lib/working";
 import { ReportsPanel } from "./reports-panel";
 import { TaskBoard, type BoardFilter } from "./task-board";
 import { TaskDetail } from "./task-detail";
 import { ConnectionBadge, Toasts, type ToastMsg } from "./ui";
-import { ORG_NAME } from "@/lib/brand";
 
 export type Tab = "chat" | "office" | "board" | "reports" | "agents";
 
@@ -43,6 +43,7 @@ export function SforceApp() {
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMsg[]>([]);
+  const [brand, setBrand] = useBrand();
   const choosePartnerRef = useRef<(id: string) => void>(() => {});
 
   const agents = useResource<Agent[]>("agents", "/api/agents");
@@ -144,18 +145,7 @@ export function SforceApp() {
     <div className="mx-auto w-full max-w-[760px] px-3 pb-10 pt-[max(12px,env(safe-area-inset-top))] sm:px-5 md:max-w-[1100px] lg:grid lg:max-w-[1400px] lg:grid-cols-[232px_minmax(0,1fr)] lg:items-start lg:gap-5 lg:px-6 lg:pt-6">
       <aside className="card overflow-hidden lg:sticky lg:top-6">
         <header className="flex items-center justify-between gap-3 px-4 py-4 sm:px-5 lg:flex-col lg:items-start lg:gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-[#e6cfa9] bg-[#fbecd2] text-2xl">
-              👑
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate text-lg text-ink">{ORG_NAME}</h1>
-              <p className="flex items-center gap-1.5 text-xs text-ink-2">
-                <span className="h-2 w-2 rounded-full bg-[#4fa05d]" /> 사단장
-                전용 비서처
-              </p>
-            </div>
-          </div>
+          <BrandHeader brand={brand} onChange={setBrand} toast={toast} />
           <button onClick={reloadAll} title="새로고침" className="shrink-0">
             <ConnectionBadge mode={mode} error={error} lastOk={lastOk} />
           </button>
@@ -235,6 +225,7 @@ export function SforceApp() {
             working={working}
             now={now}
             size="full"
+            orgName={brand.orgName ?? undefined}
             view={officeView}
             onView={chooseOfficeView}
             onOpenRoom={openRoom}

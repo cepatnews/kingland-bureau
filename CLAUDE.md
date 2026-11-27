@@ -23,6 +23,8 @@
 | `lib/chain-of-command.ts` | 지휘·보고 규칙 (한 곳에만) |
 | `lib/office-scene.ts` · `components/office-view.tsx` | 실시간 사무실 (3D/평면/도면) |
 | `lib/track-record.ts` | 평가 누적(참모 또는 간단 구성의 대장) → 잘하는 분야 배정 |
+| `components/brand.tsx` · `app/api/brand` · `app/api/settings` · `scripts/set-brand.mjs` | 회사 이름·로고 (노션 01 설정). 앱 왼쪽 위 클릭으로 변경 |
+| `install/` | 설치 파일: 맥 `.command`·한 줄 `install.sh`, 윈도우 `.bat` → 내려받기·설치 후 `claude "/kingland-setup"` |
 | `lib/settings.ts` | 운영 설정: `REPORT_STYLE`·`REPORT_TIMING`·`DEFAULT_DUE_DAYS` |
 | `lib/daily-report.ts` · `app/api/cron/daily-report` · `vercel.json` | 일일 보고서(05) — Vercel Cron(CRON_SECRET) 또는 보고서 탭 버튼 |
 | `lib/mock-store.ts` · `lib/fake-model.ts` | 노션·AI 없이 개발할 때의 목업 |

@@ -125,6 +125,12 @@ export interface ChatMessage {
   at: string; // 보낸 시각
 }
 
+/** 01 설정: 회사(조직) 이름 · 로고 (로고는 작은 이미지 data URL) */
+export interface Brand {
+  orgName: string | null;
+  logo: string | null;
+}
+
 export interface NewChatMessage {
   room: string;
   senderName: string;

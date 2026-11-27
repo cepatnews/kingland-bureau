@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ORG_NAME } from "@/lib/brand";
+import { BrandLogo, useBrand } from "@/components/brand";
 
 function safeNext(): string {
   if (typeof window === "undefined") return "/";
@@ -11,6 +12,7 @@ function safeNext(): string {
 }
 
 export default function LoginPage() {
+  const [brand] = useBrand();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -42,9 +44,9 @@ export default function LoginPage() {
         className="w-full max-w-sm rounded-3xl border border-line bg-card p-6 shadow-[0_8px_30px_rgba(110,67,32,0.08)]"
       >
         <div className="mb-5 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-brown-soft text-2xl">👑</div>
+          <BrandLogo brand={brand} />
           <div>
-            <h1 className="text-lg text-ink">{ORG_NAME}</h1>
+            <h1 className="text-lg text-ink">{brand.orgName || ORG_NAME}</h1>
             <p className="text-sm text-muted">사단장 전용 · 비밀번호를 입력하세요</p>
           </div>
         </div>

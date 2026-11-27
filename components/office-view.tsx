@@ -53,6 +53,7 @@ export function OfficeView({
   onExpand,
   view,
   onView,
+  orgName,
 }: {
   org: Org;
   agents: Agent[];
@@ -65,6 +66,7 @@ export function OfficeView({
   onExpand?: () => void;
   view: OfficeViewMode; // 3d = 입체 일러스트, flat = 평면 일러스트, plan = 코드 도면
   onView?: (v: OfficeViewMode) => void;
+  orgName?: string;
 }) {
   const art = view !== "plan";
   const layout =
@@ -150,7 +152,7 @@ export function OfficeView({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2 px-1">
         <span className="text-[15px] text-ink">
-          🏢 {ORG_NAME} 본부 사무실
+          🏢 {orgName ?? ORG_NAME} 본부 사무실
         </span>
         <span className="text-xs text-muted">
           실제 업무 흐름대로 움직입니다 · 사람을 누르면 지금 하는 일

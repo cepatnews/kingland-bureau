@@ -3,6 +3,7 @@
 // (scripts/setup-notion.mjs가 이 이름 그대로 만들어 준다)
 
 export const NOTION_DB = {
+  settings: { prefix: "01", title: "01 설정", env: "NOTION_SETTINGS_DB_ID" },
   agents: { prefix: "02", title: "02 조직도 및 역할", env: "NOTION_AGENTS_DB_ID" },
   tasks: { prefix: "04", title: "04 AI 공용 업무 DB", env: "NOTION_TASKS_DB_ID" },
   reports: { prefix: "05", title: "05 최종 보고서 (대장 피클)", env: "NOTION_REPORTS_DB_ID" },

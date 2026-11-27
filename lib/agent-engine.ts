@@ -66,7 +66,13 @@ export async function runAgents(room: string, firstIds: string[], userText: stri
 
 async function agentTurn(room: string, job: Job): Promise<Job[]> {
   const s = store();
-  const [agents, tasks, history] = await Promise.all([s.listAgents(), s.listTasks(), s.listMessages(room, { limit: 30 })]);
+  const [agents, tasks, history, brand] = await Promise.all([
+    s.listAgents(),
+    s.listTasks(),
+    s.listMessages(room, { limit: 30 }),
+    s.getBrand().catch(() => null),
+  ]);
+  const orgName = brand?.orgName || ORG_NAME;
   // 실적은 대장·참모만 필요 (배정 판단용). 실패해도 대화는 계속한다.
   const caller = agents.find((a) => a.id === job.agentId);
   const record =
@@ -85,7 +91,7 @@ async function agentTurn(room: string, job: Job): Promise<Job[]> {
 
   const result = await generateText({
     model: await model(),
-    system: persona(org, me, agents, record),
+    system: persona(org, me, agents, record, orgName),
     prompt: [
       "■ 회의실 최근 대화 (오래된 순)",
       formatHistory(history) || "(아직 대화 없음)",
@@ -259,7 +265,7 @@ function buildTools(org: Org, me: Agent, tasks: Task[], next: Job[], notices: { 
 }
 
 // ---------- 프롬프트 ----------
-function persona(org: Org, me: Agent, agents: Agent[], record: Map<string, FieldStat[]>): string {
+function persona(org: Org, me: Agent, agents: Agent[], record: Map<string, FieldStat[]>, ORG_NAME: string): string {
   const boss = superiorOf(org, me.id);
   const subs = subordinatesOf(agents, me.id).filter((a) => a.state !== "중지");
   const commanderField = org.commander ? subordinatesOf(agents, org.commander.id).filter((a) => a.rank === "실무" && a.state !== "중지") : [];

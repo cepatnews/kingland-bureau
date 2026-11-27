@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "setup:notion": "node scripts/setup-notion.mjs"
+    "setup:notion": "node scripts/setup-notion.mjs",
+    "set:brand": "node scripts/set-brand.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "2.0.141",

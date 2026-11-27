@@ -3,12 +3,13 @@ import "server-only";
 // 조직은 실제 노션 02와 같은 구성. 강점·역량은 비워 둔다 (사용자가 직접 입력).
 
 import type { Store } from "./notion-store";
-import type { Agent, ChatMessage, FinalReport, Task, TaskReport } from "./types";
+import type { Agent, Brand, ChatMessage, FinalReport, Task, TaskReport } from "./types";
 
 const now = () => new Date().toISOString();
 const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
 const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10);
 let seq = 100;
+const brand: Brand = { orgName: null, logo: null };
 const newId = (p: string) => `${p}-${++seq}`;
 
 function agent(id: string, name: string, rank: Agent["rank"], unit: Agent["unit"], app: Agent["app"], sup: string | null, state: Agent["state"] = "활성"): Agent {
@@ -155,6 +156,12 @@ export const mockStore: Store = {
     const m: ChatMessage = { id: newId("m"), room: input.room, senderName: input.senderName, senderId: input.senderId, kind: input.kind, text: input.text, taskIds: input.taskIds ?? [], at: now() };
     db().messages.push(m);
     return clone(m);
+  },
+  async getBrand() { return { ...brand }; },
+  async setBrand(patch) {
+    if (patch.orgName !== undefined) brand.orgName = patch.orgName || null;
+    if (patch.logo !== undefined) brand.logo = patch.logo || null;
+    return { ...brand };
   },
   async listFinalReports() { return clone(db().finals); },
   async createFinalReport(input) {

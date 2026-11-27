@@ -25,7 +25,7 @@ git --version
 
 ## 0.5단계. 먼저 함께 비서처 설계하기 (질문은 하나씩, 보기 + 추천)
 `docs/PROMPTS.md`의 STEP 1과 같은 순서로 묻는다.
-1. **기본**: 조직 이름(`NEXT_PUBLIC_ORG_NAME`, 기본 KingLand Bureau), 노션 본부 페이지 이름
+1. **회사 정보**: 회사(조직) 이름 → `NEXT_PUBLIC_ORG_NAME`, 로고 이미지가 있는지 (있으면 파일 위치를 물어본다: 바탕화면에 있으면 끌어다 놓거나 경로를 알려 달라고 한다. 없으면 👑 기본 아이콘, 나중에 앱 왼쪽 위 로고를 눌러 올릴 수 있다고 알려 준다), 노션 본부 페이지 이름
 2. **구성 방식** (대장 피클은 항상 있음):
    - **A. 간단 구성** — 참모 없이 대장 피클에게 에이전트 몇 명이 바로 보고 (예: 와비·부이·키링). 혼자 쓰거나 앱이 몇 개뿐이면 추천.
    - **B. 풀 구성** — 대장 → 좌참·우참 피클 → 부대원.
@@ -42,10 +42,11 @@ git --version
 - daily·both면 `vercel.json`의 schedule 수정
 
 ## 1단계. 내 저장소로 코드 가져오기
-이미 이 저장소 폴더 안에서 실행 중이면 건너뛴다. 아니면:
-- GitHub CLI(`gh`)가 있으면: `gh repo create <원하는-이름> --template cepatnews/kingland-bureau --private --clone`
-- 없으면: GitHub에서 저장소 페이지의 **Use this template → Create a new repository**를 누르게 하고, 만든 저장소를 `git clone` 한다.
-그다음 `npm install`.
+- **설치 파일(KingLand-설치.command / .bat)로 시작한 경우**: 코드와 `npm install`은 이미 끝나 있고, 원본 연결은 `template`이라는 이름으로 바뀌어 있다 (`git remote -v`로 확인). 배포(Vercel)에 쓸 **내 GitHub 저장소**만 만들면 된다:
+  - `gh`가 있고 로그인돼 있으면: 저장소 이름을 물어보고 `gh repo create <이름> --private --source . --remote origin --push`
+  - 없으면: github.com/new 에서 **빈 Private 저장소**를 만들게 하고, `git remote add origin <주소>` → `git push -u origin main`
+  - 이 단계는 6단계(배포) 직전에 해도 된다. 로컬 확인(5단계)까지는 저장소 없이 가능.
+- 이 폴더 밖에서 시작했다면: `gh repo create <이름> --template cepatnews/kingland-bureau --private --clone` 또는 GitHub에서 **Use this template**로 만든 뒤 `git clone` → `npm install`.
 
 ## 2단계. 노션 준비 (사용자가 직접)
 1. **본부 페이지 만들기**: 노션에서 빈 페이지를 하나 만든다 (이름 예: `AI SForce 본부`). 이 페이지 아래에 DB들이 자동으로 생긴다.
@@ -73,8 +74,9 @@ node -e 'const fs=require("fs");const t=fs.readFileSync(".env.local","utf8");for
 npm run setup:notion
 ```
 - `scripts/crew.json`이 있으면 그 부대원으로, 없으면 기본 8명으로 만든다.
-- 본부 페이지 아래에 `02 조직도 및 역할`, `04 AI 공용 업무 DB`, `05 최종 보고서 (대장 피클)`, `09 업무 보고 이력`, `10 회의실 대화`가 생기고, 02에 기본 조직 11명(대장 피클·좌참 피클·우참 피클·부대원 8)이 들어간다.
+- 본부 페이지 아래에 `01 설정`(회사 이름·로고), `02 조직도 및 역할`, `04 AI 공용 업무 DB`, `05 최종 보고서 (대장 피클)`, `09 업무 보고 이력`, `10 회의실 대화`가 생기고, 02에 기본 조직 11명(대장 피클·좌참 피클·우참 피클·부대원 8)이 들어간다.
 - 여러 번 실행해도 안전하다(있는 DB는 건너뜀).
+- 끝나면 회사 정보를 저장한다: `npm run set:brand -- --name "<회사 이름>"` (로고 파일이 있으면 `--logo "<경로>"` 추가). 로고는 자동으로 작게 줄여 노션 「01 설정」에 저장된다.
 - 오류별 대처:
   - `401` → 토큰이 틀림. 통합 시크릿을 다시 복사해 넣게 한다.
   - `404` → 본부 페이지에 통합이 연결되지 않았거나 링크가 틀림 → 2단계 3번.

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, safeEqual, sessionToken } from "@/lib/auth";
 
-const PUBLIC_PATHS = ["/login", "/api/login"];
+const PUBLIC_PATHS = ["/login", "/api/login", "/api/brand"]; // /api/brand 는 읽기(GET)만 있음
 
 function deny(req: NextRequest, status: number, error: string) {
   if (req.nextUrl.pathname.startsWith("/api/")) {

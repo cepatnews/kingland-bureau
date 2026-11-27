@@ -3,6 +3,7 @@ import "server-only";
 // 토큰 값은 절대 로그·응답에 넣지 않는다.
 
 import type {
+  Brand,
   Agent,
   AgentPatch,
   ChatMessage,
@@ -23,6 +24,7 @@ const API = "https://api.notion.com/v1";
 // DB ID: 환경변수(NOTION_*_DB_ID)가 있으면 그것을, 없으면 NOTION_ROOT_PAGE_ID 페이지 아래에서
 // 이름이 "02 ", "04 " … 로 시작하는 DB를 찾아 쓴다 (서버 인스턴스마다 한 번만 찾고 기억).
 const DB = {
+  settings: () => dbId("settings"),
   agents: () => dbId("agents"),
   tasks: () => dbId("tasks"),
   reports: () => dbId("reports"),
@@ -408,6 +410,36 @@ export const notionStore = {
     if (input.taskIds?.length) properties["관련 업무"] = w.relation(input.taskIds);
     const page = await notion<Page>(`/pages`, { method: "POST", body: { parent: { database_id: await DB.chat() }, properties } });
     return toChat(page);
+  },
+
+  // ---------- 01 설정 (회사 이름 · 로고) ----------
+  async getBrand(): Promise<Brand> {
+    let pages: Page[];
+    try {
+      pages = await queryAll(await DB.settings());
+    } catch {
+      return { orgName: null, logo: null }; // 01 설정 DB가 없으면 기본값
+    }
+    const get = (key: string) => {
+      const pg = pages.find((x) => text(x, "항목") === key);
+      return pg ? text(pg, "값").trim() || null : null;
+    };
+    return { orgName: get("조직 이름"), logo: get("로고") };
+  },
+
+  async setBrand(patch: { orgName?: string; logo?: string | null }): Promise<Brand> {
+    const dbIdSettings = await DB.settings().catch(() => {
+      throw new NotionError("노션에 「01 설정」 DB가 없습니다. npm run setup:notion 을 다시 실행하면 만들어집니다.", 500);
+    });
+    const pages = await queryAll(dbIdSettings);
+    const put = async (key: string, value: string) => {
+      const pg = pages.find((x) => text(x, "항목") === key);
+      if (pg) await notion(`/pages/${pg.id}`, { method: "PATCH", body: { properties: { 값: w.text(value) } } });
+      else await notion(`/pages`, { method: "POST", body: { parent: { database_id: dbIdSettings }, properties: { 항목: w.title(key), 값: w.text(value) } } });
+    };
+    if (patch.orgName !== undefined) await put("조직 이름", patch.orgName);
+    if (patch.logo !== undefined) await put("로고", patch.logo ?? "");
+    return this.getBrand();
   },
 
   async listFinalReports(): Promise<FinalReport[]> {

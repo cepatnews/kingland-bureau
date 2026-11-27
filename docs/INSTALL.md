@@ -3,6 +3,10 @@
 이 안내서를 위에서부터 순서대로 따라 하면 **내 노션 + 내 웹 주소**로 KingLand Bureau가 돌아갑니다.
 걸리는 시간: 처음이면 30~60분.
 
+> ⚡ **가장 빠른 방법 — 설치 파일**: [최신 Release](https://github.com/cepatnews/kingland-bureau/releases/latest)에서 맥은 `KingLand-설치-mac.zip`, 윈도우는 `KingLand-설치-windows.zip`을 받아 압축을 풀고 더블클릭하세요. 준비물 확인 → 내려받기 → 설치 → Claude Code 인터뷰까지 자동으로 이어집니다.
+> - 맥에서 "확인되지 않은 개발자" 경고가 뜨면: 파일을 **오른쪽 클릭 → 열기 → 열기** (처음 한 번만).
+> - 터미널이 익숙하면 한 줄로: `curl -fsSL https://raw.githubusercontent.com/cepatnews/kingland-bureau/main/install/install.sh | bash`
+>
 > 🤖 **AI에게 맡기고 싶다면** → [단계별 프롬프트 모음](PROMPTS.md)을 순서대로 붙여 넣거나, Claude Code에서 `/kingland-setup` 을 입력하세요.
 
 ---
@@ -20,7 +24,8 @@
 
 | 정할 것 | 예시 | 나중에 바꾸기 |
 |---|---|---|
-| 조직 이름 (화면 제목) | `KingLand Bureau`, `우리집 비서실` | Vercel 환경변수 `NEXT_PUBLIC_ORG_NAME` → Redeploy |
+| 회사(조직) 이름 | `햇살 컴퍼니`, `우리집 비서실` | 앱 왼쪽 위 **이름을 클릭** |
+| 회사 로고 | 이미지 파일 (png·jpg·webp) | 앱 왼쪽 위 **로고를 클릭** |
 | 노션 본부 페이지 이름 | `AI SForce 본부` | 노션에서 바로 |
 | 앱 로그인 비밀번호 | 남이 모르는 문장 | Vercel 환경변수 `APP_PASSWORD` → Redeploy |
 | **구성 방식** | 간단 구성(대장 + 에이전트 몇 명) / 풀 구성(대장 + 참모 2 + 부대원) | 노션 02 조직도의 `상관`을 바꾸면 됨 |
@@ -144,6 +149,10 @@ cp scripts/crew.example.json scripts/crew.json          # 풀 구성에서 부�
 그다음 실행:
 ```bash
 npm run setup:notion
+```
+회사 이름·로고 저장 (로고가 없으면 `--logo` 빼기, 나중에 앱에서 로고를 눌러 올려도 됨):
+```bash
+npm run set:brand -- --name "햇살 컴퍼니" --logo ~/Desktop/logo.png
 ```
 성공하면 이렇게 나옵니다:
 ```
