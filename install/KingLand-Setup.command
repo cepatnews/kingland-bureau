@@ -40,7 +40,8 @@ if command -v node >/dev/null 2>&1; then
   if [ "$NODE_MAJOR" -ge 20 ]; then ok "Node.js $(node -v)"; else warn "Node.js가 너무 오래됐습니다 ($(node -v)) → https://nodejs.org 에서 LTS 설치"; missing=1; fi
 else warn "Node.js가 없습니다 → https://nodejs.org 에서 LTS 버전 설치"; missing=1; fi
 if command -v claude >/dev/null 2>&1; then ok "Claude Code 설치됨"; else warn "Claude Code가 없습니다 → https://claude.com/claude-code 에서 설치 후 한 번 로그인"; missing=1; fi
-[ "$missing" -eq 0 ] || die "위 준비물을 설치한 뒤 이 설치기를 다시 실행해 주세요."
+[ "$missing" -eq 0 ] || die "위 준비물을 설치한 뒤 이 설치기를 다시 실행해 주세요.
+     화면 따라 하기 안내: https://github.com/cepatnews/kingland-bureau/blob/main/docs/PREREQUISITES.md"
 
 # ---------- 2. 설치 위치 ----------
 echo

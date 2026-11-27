@@ -20,6 +20,7 @@
 - 📋 업무 현황(한 줄 목록·카드) · 승인 대기 · 최종 보고서 · 에이전트 관리 · 휴대폰 반응형 · 비밀번호 잠금.
 
 ## ⚡ 설치 파일 (Claude Code 쓰는 분)
+0. 처음이면 먼저 **[준비물 한눈에](docs/PREREQUISITES.md)** — Node.js · [Git·GitHub](docs/GIT.md) · Claude Code · [노션](docs/NOTION.md) · Vercel · OpenAI
 1. [최신 Release](https://github.com/cepatnews/kingland-bureau/releases/latest)에서 받기 — 맥 `KingLand-Setup-mac.zip` / 윈도우 `KingLand-Setup-windows.zip`
 2. 압축 풀고 **더블클릭** → 준비물 확인 · 내려받기 · 설치가 끝나면 Claude Code가 열려 **인터뷰**(회사 이름·로고, 에이전트 구성, 보고 방식 …)를 시작합니다.
 

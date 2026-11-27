@@ -30,6 +30,10 @@ KingLand Bureau는 노션을 데이터베이스로 쓰는 Next.js 웹앱이고, 
 - 내 노션의 기존 페이지는 지우거나 고치지 마.
 
 먼저 내 상황을 파악하게 질문을 시작해 줘: 쓰는 컴퓨터(맥/윈도우), Node.js·Git 설치 여부, GitHub·노션·Vercel·OpenAI 계정 유무를 하나씩 물어봐.
+없는 게 있으면 이 안내서를 기준으로 화면 하나씩 같이 해 줘:
+- 준비물 전체: https://github.com/cepatnews/kingland-bureau/blob/main/docs/PREREQUISITES.md
+- Git·GitHub: https://github.com/cepatnews/kingland-bureau/blob/main/docs/GIT.md
+- 노션: https://github.com/cepatnews/kingland-bureau/blob/main/docs/NOTION.md
 ```
 
 ## STEP 1 — 내 비서처 설계하기 (구성 · 보고 · 타임라인)
@@ -103,7 +107,7 @@ STEP 2: 내 GitHub 저장소를 만들고 내 컴퓨터로 받자.
 ## STEP 3 — 노션 준비 (내가 직접)
 
 ```
-STEP 3: 노션 준비를 안내해 줘. 이건 내가 직접 해야 하니 한 단계씩 기다려 줘.
+STEP 3: 노션 준비를 안내해 줘. 이건 내가 직접 해야 하니 한 단계씩 기다려 줘. 화면 설명은 docs/NOTION.md 를 기준으로 해 줘.
 1) STEP 1에서 정한 이름으로 빈 페이지 만들기
 2) https://www.notion.so/profile/integrations 에서 내부 통합 만들기 (기능: 읽기·업데이트·입력, 사용자 정보 없음)
 3) 본부 페이지 ••• → 연결 → 그 통합 추가  (가장 많이 빠뜨리니 꼭 확인해 줘)

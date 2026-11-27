@@ -68,6 +68,9 @@
 
 ## ① 계정 준비
 
+> 📚 처음이면 화면 따라 하기 안내부터: **[준비물 한눈에](PREREQUISITES.md)** · **[Git·GitHub 준비](GIT.md)** · **[노션 준비](NOTION.md)**
+
+
 | 계정 | 용도 | 비용 |
 |---|---|---|
 | [GitHub](https://github.com) | 내 코드 보관 | 무료 |
@@ -94,6 +97,9 @@ git --version
 
 ## ③ 노션 준비
 
+> 📚 화면별 자세한 설명·막힐 때 해결: **[노션 준비 안내](NOTION.md)**
+
+
 1. **본부 페이지**: 노션에서 새 빈 페이지를 만들고 이름을 붙입니다 (예: `AI SForce 본부`).
 2. **통합(Integration) 만들기**
    - https://www.notion.so/profile/integrations → **+ 새 통합**
@@ -109,7 +115,7 @@ git --version
 ```bash
 cp .env.example .env.local
 ```
-`.env.local`을 텍스트 편집기로 엽니다 (점으로 시작하는 숨김 파일이라 Finder에 안 보이면 `open -e .env.local`).
+`.env.local`을 텍스트 편집기로 엽니다 (점으로 시작하는 숨김 파일이라 폴더 창에 안 보이면 맥 `open -e .env.local` / 윈도우 `notepad .env.local`).
 
 ```
 NOTION_TOKEN=ntn_...            ← ③-2에서 복사한 시크릿

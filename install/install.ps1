@@ -47,7 +47,7 @@ function Install-KingLand {
     Say-Warn 'Claude Code가 없습니다 → https://claude.com/claude-code 에서 설치하고 한 번 로그인'; $missing++
   }
   if ($missing -gt 0) {
-    throw '위 준비물을 설치한 뒤, 새 창에서 이 설치기를 다시 실행해 주세요. (설치 직후에는 창을 새로 열어야 인식됩니다)'
+    throw "위 준비물을 설치한 뒤, 새 창에서 이 설치기를 다시 실행해 주세요. (설치 직후에는 창을 새로 열어야 인식됩니다)`n      화면 따라 하기 안내: https://github.com/cepatnews/kingland-bureau/blob/main/docs/PREREQUISITES.md"
   }
 
   # ---------- 2. 설치 위치 ----------

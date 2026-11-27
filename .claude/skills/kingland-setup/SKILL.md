@@ -16,6 +16,7 @@ Claude가 할 수 있는 일(명령 실행·파일 만들기·확인)은 직접 
 - Slack·이메일 연동은 안내하지 않는다. 연결은 **노션만** 쓴다.
 
 ## 0단계. 준비물 확인
+처음 하는 사용자에게는 이 저장소의 안내서를 기준으로 화면 하나씩 같이 한다: `docs/PREREQUISITES.md`(전체), `docs/GIT.md`(Git·GitHub·gh), `docs/NOTION.md`(노션 가입·본부 페이지·통합·연결). 사용자가 막히면 해당 문서의 "자주 막히는 곳" 표를 먼저 본다.
 다음을 확인하고, 없는 것만 설치를 안내한다.
 ```bash
 node -v   # 20 이상
@@ -48,7 +49,7 @@ git --version
   - 이 단계는 6단계(배포) 직전에 해도 된다. 로컬 확인(5단계)까지는 저장소 없이 가능.
 - 이 폴더 밖에서 시작했다면: `gh repo create <이름> --template cepatnews/kingland-bureau --private --clone` 또는 GitHub에서 **Use this template**로 만든 뒤 `git clone` → `npm install`.
 
-## 2단계. 노션 준비 (사용자가 직접)
+## 2단계. 노션 준비 (사용자가 직접 — 자세한 화면은 `docs/NOTION.md`)
 1. **본부 페이지 만들기**: 노션에서 빈 페이지를 하나 만든다 (이름 예: `AI SForce 본부`). 이 페이지 아래에 DB들이 자동으로 생긴다.
 2. **통합 만들기**: https://www.notion.so/profile/integrations → **새 통합** → 이름(예: `KingLand App`), 유형 **내부** → 저장.
    - 기능: 콘텐츠 읽기·업데이트·입력 ✅, 사용자 정보 없음.
@@ -61,7 +62,7 @@ Claude가 파일만 만든다:
 ```bash
 [ -f .env.local ] || cp .env.example .env.local
 ```
-그리고 사용자에게 에디터로 `.env.local`을 열어 아래 4개를 **직접** 채우게 한다:
+그리고 사용자에게 에디터로 `.env.local`을 열어 (맥 `open -e .env.local`, 윈도우 `notepad .env.local`) 아래 4개를 **직접** 채우게 한다:
 `NOTION_TOKEN`, `NOTION_ROOT_PAGE_ID`, `APP_PASSWORD`(앱 로그인 비밀번호, 직접 정함), `OPENAI_API_KEY`.
 
 **키 확인** (값은 출력하지 않음):
