@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* 크림·베이지 + 갈색 톤 (기존 비서실 화면과 동일 계열) */
+:root {
+  color-scheme: light;
+  --bg: #f6eee2;
+  --bg-deep: #efe3d1;
+  --card: #fffaf2;
+  --card-2: #fbf3e6;
+  --line: #ead9bf;
+  --ink: #3a2a1b;
+  --ink-2: #6f5a44;
+  --muted: #a08a70;
+  --brown: #8b5a2b;
+  --brown-2: #6e4320;
+  --brown-soft: #f1e2cc;
+  --wait: #f8edd3;
+  --wait-ink: #8a6a1e;
+  --run: #fbe4e0;
+  --run-ink: #b5473a;
+  --done: #e3f1e4;
+  --done-ink: #3f7d4a;
+  --review: #ece4f6;
+  --review-ink: #6b4f99;
+  --hold: #eee6dc;
+  --hold-ink: #7d6b58;
+  --info: #e2ecf7;
+  --info-ink: #3f6591;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-deep: var(--bg-deep);
+  --color-card: var(--card);
+  --color-card-2: var(--card-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-brown: var(--brown);
+  --color-brown-2: var(--brown-2);
+  --color-brown-soft: var(--brown-soft);
+  --font-sans: var(--font-kr), system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 50% -200px, #fff8ee 0%, transparent 70%),
+    var(--bg);
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 긴 글(브리핑·코드형 블록)은 굵기를 한 단계 낮춰 가독성 유지 */
+pre,
+.text-long {
+  font-weight: 500;
+}
+
+.btn-brown {
+  background: linear-gradient(180deg, #a26a35 0%, var(--brown-2) 100%);
+  color: #fff8ef;
+  box-shadow: 0 6px 14px -6px rgba(110, 67, 32, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.btn-brown:disabled {
+  opacity: 0.55;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px -18px rgba(90, 60, 30, 0.35);
+}
+
+.field {
+  background: #fffdf9;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  outline: none;
+}
+.field:focus {
+  border-color: #c89a6a;
+  box-shadow: 0 0 0 3px rgba(200, 154, 106, 0.18);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.sheet-in {
+  animation: sheet-up 0.22s ease-out;
+}
