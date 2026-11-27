@@ -1,0 +1,5 @@
+# 설치 파일 줄바꿈: 윈도우용은 CRLF, 맥·리눅스용은 LF
+*.bat     text eol=crlf
+*.ps1     text eol=crlf
+*.sh      text eol=lf
+*.command text eol=lf

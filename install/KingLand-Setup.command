@@ -5,6 +5,7 @@
 #  키·비밀번호는 이 스크립트가 묻거나 저장하지 않습니다. (인터뷰에서 .env.local 에 직접 넣게 안내)
 #
 #  한 줄 설치:  curl -fsSL https://raw.githubusercontent.com/cepatnews/kingland-bureau/main/install/install.sh | bash
+#  환경변수(선택): KB_DIR=설치 폴더(묻지 않음), KB_NO_LAUNCH=1(마지막에 Claude Code를 열지 않음, 시험용)
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -44,7 +45,8 @@ if command -v claude >/dev/null 2>&1; then ok "Claude Code 설치됨"; else warn
 # ---------- 2. 설치 위치 ----------
 echo
 bold "2/4  설치할 위치"
-DIR=$(ask "어디에 만들까요? [엔터 = $DEFAULT_DIR]" "$DEFAULT_DIR")
+DIR="${KB_DIR:-}"   # KB_DIR 이 있으면 묻지 않음 (시험·자동 설치용)
+[ -n "$DIR" ] || DIR=$(ask "어디에 만들까요? [엔터 = $DEFAULT_DIR]" "$DEFAULT_DIR")
 DIR="${DIR/#\~/$HOME}"
 
 # ---------- 3. 코드 내려받기 ----------
