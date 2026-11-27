@@ -42,7 +42,7 @@ git --version
 - daily·both면 `vercel.json`의 schedule 수정
 
 ## 1단계. 내 저장소로 코드 가져오기
-- **설치 파일(KingLand-설치.command / .bat)로 시작한 경우**: 코드와 `npm install`은 이미 끝나 있고, 원본 연결은 `template`이라는 이름으로 바뀌어 있다 (`git remote -v`로 확인). 배포(Vercel)에 쓸 **내 GitHub 저장소**만 만들면 된다:
+- **설치 파일(KingLand-Setup.command / .bat)로 시작한 경우**: 코드와 `npm install`은 이미 끝나 있고, 원본 연결은 `template`이라는 이름으로 바뀌어 있다 (`git remote -v`로 확인). 배포(Vercel)에 쓸 **내 GitHub 저장소**만 만들면 된다:
   - `gh`가 있고 로그인돼 있으면: 저장소 이름을 물어보고 `gh repo create <이름> --private --source . --remote origin --push`
   - 없으면: github.com/new 에서 **빈 Private 저장소**를 만들게 하고, `git remote add origin <주소>` → `git push -u origin main`
   - 이 단계는 6단계(배포) 직전에 해도 된다. 로컬 확인(5단계)까지는 저장소 없이 가능.

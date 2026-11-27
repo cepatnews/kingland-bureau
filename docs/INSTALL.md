@@ -3,7 +3,7 @@
 이 안내서를 위에서부터 순서대로 따라 하면 **내 노션 + 내 웹 주소**로 KingLand Bureau가 돌아갑니다.
 걸리는 시간: 처음이면 30~60분.
 
-> ⚡ **가장 빠른 방법 — 설치 파일**: [최신 Release](https://github.com/cepatnews/kingland-bureau/releases/latest)에서 맥은 `KingLand-설치-mac.zip`, 윈도우는 `KingLand-설치-windows.zip`을 받아 압축을 풀고 더블클릭하세요. 준비물 확인 → 내려받기 → 설치 → Claude Code 인터뷰까지 자동으로 이어집니다.
+> ⚡ **가장 빠른 방법 — 설치 파일**: [최신 Release](https://github.com/cepatnews/kingland-bureau/releases/latest)에서 맥은 `KingLand-Setup-mac.zip`, 윈도우는 `KingLand-Setup-windows.zip`을 받아 압축을 풀고 더블클릭하세요. 준비물 확인 → 내려받기 → 설치 → Claude Code 인터뷰까지 자동으로 이어집니다.
 > - 맥에서 "확인되지 않은 개발자" 경고가 뜨면: 파일을 **오른쪽 클릭 → 열기 → 열기** (처음 한 번만).
 > - 터미널이 익숙하면 한 줄로: `curl -fsSL https://raw.githubusercontent.com/cepatnews/kingland-bureau/main/install/install.sh | bash`
 >

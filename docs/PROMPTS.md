@@ -87,7 +87,7 @@ STEP 1: 설치 전에 내 비서처를 어떻게 운영할지 나와 함께 정�
 ```
 
 ## STEP 2 — 내 저장소 만들기
-> 설치 파일(KingLand-설치.command / .bat)로 시작했다면 코드 내려받기와 npm install은 이미 끝났습니다. 이 단계에서는 배포용 **내 GitHub 저장소**만 만들면 됩니다 (`gh repo create <이름> --private --source . --remote origin --push`).
+> 설치 파일(KingLand-Setup.command / .bat)로 시작했다면 코드 내려받기와 npm install은 이미 끝났습니다. 이 단계에서는 배포용 **내 GitHub 저장소**만 만들면 됩니다 (`gh repo create <이름> --private --source . --remote origin --push`).
 
 
 ```
