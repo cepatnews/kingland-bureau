@@ -86,3 +86,6 @@ SFORCE_FAKE_AI=1 npm run dev   # AI 키 없이 가짜 AI로 업무 흐름만 확
 npx tsc --noEmit && npx eslint .
 ```
 구조는 [CLAUDE.md](CLAUDE.md)를 참고하세요. 사무실 일러스트·캐릭터는 AI로 생성한 이미지입니다 (`public/office/`).
+
+## 라이선스
+[MIT](LICENSE) — 자유롭게 복사·수정·배포·상업적 이용이 가능합니다. 저작권 표시와 라이선스 문구만 함께 남겨 주세요.
