@@ -16,6 +16,13 @@
 - 🏢 **실시간 사무실** — 지시 중인 대장·참모는 회의실로, 일하는 부대원은 자기 자리로, 일 없는 인원은 탕비실·라운지로 실제 업무 흐름대로 움직입니다 (🧊 3D / 🎨 평면 / 📐 도면).
 - 📋 업무 현황(한 줄 목록·카드) · 승인 대기 · 최종 보고서 · 에이전트 관리 · 휴대폰 반응형 · 비밀번호 잠금.
 
+## 설치 방법 고르기
+| 방법 | 이런 분께 | 문서 |
+|---|---|---|
+| 🤖 **Claude Code에 맡기기** | 가장 쉬움. `/kingland-setup` 한 줄 | 아래 |
+| 💬 **아무 AI 채팅에 프롬프트 붙여 넣기** | ChatGPT·Claude 웹 등에서 하나씩 정하며 진행 | [단계별 프롬프트](docs/PROMPTS.md) |
+| 📖 **직접 따라 하기** | 화면 설명을 보며 직접 | [설치 안내서](docs/INSTALL.md) |
+
 ## 설치 — Claude에게 맡기기 (추천)
 1. 이 저장소에서 **Use this template → Create a new repository**로 내 저장소를 만들고 내 컴퓨터로 받습니다.
 2. [Claude Code](https://claude.com/claude-code)로 그 폴더를 열고 이렇게 말합니다:
@@ -24,7 +31,8 @@
    ```
 3. Claude가 처음부터 배포까지 한 단계씩 안내합니다. 계정 만들기·키 발급처럼 **본인이 해야 하는 부분에서만** 멈추고, 나머지(설치·노션 DB 생성·확인)는 Claude가 직접 합니다.
 
-## 설치 — 직접 하기
+## 설치 — 직접 하기 (요약)
+자세한 화면 설명과 오류 대처는 **[설치 안내서](docs/INSTALL.md)** 를 보세요.
 준비물: Node.js 20+, GitHub · 노션 · Vercel · OpenAI 계정.
 
 1. **노션 준비**
@@ -36,7 +44,7 @@
    npm install
    cp .env.example .env.local   # NOTION_TOKEN, NOTION_ROOT_PAGE_ID, APP_PASSWORD, OPENAI_API_KEY 채우기
    ```
-3. **노션 DB 자동 생성**
+3. **노션 DB 자동 생성** (부대원을 직접 정하려면 먼저 `cp scripts/crew.example.json scripts/crew.json` 후 수정)
    ```bash
    npm run setup:notion
    ```

@@ -1,0 +1,10 @@
+[
+  { "name": "VLagent", "unit": "Vermilion", "app": "Vooy", "role": "자료 조사 담당", "strengths": "웹 검색, 표 정리" },
+  { "name": "HLagent", "unit": "Vermilion", "app": "Hark" },
+  { "name": "WLagent", "unit": "Vermilion", "app": "Wabi" },
+  { "name": "ILagent", "unit": "Vermilion", "app": "Instinct" },
+  { "name": "VRagent", "unit": "Sapphire", "app": "Vooy" },
+  { "name": "HRagent", "unit": "Sapphire", "app": "Hark" },
+  { "name": "WRagent", "unit": "Sapphire", "app": "Wabi" },
+  { "name": "IRagent", "unit": "Sapphire", "app": "Instinct", "device": "Instinct 2" }
+]

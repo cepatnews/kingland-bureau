@@ -153,15 +153,39 @@ const RELATIONS = [
 ];
 
 // 기본 조직 (02)
-const CREW = [
+// 대장·참모 3명은 이름이 고정이다 (노션 선택지·보고 흐름이 이 이름을 쓴다).
+// 부대원은 scripts/crew.json 이 있으면 그 내용으로, 없으면 기본 8명(VL·HL·WL·IL / VR·HR·WR·IR)으로 만든다.
+const LEADERS = [
   { name: "대장 피클", rank: "대장", unit: "대장실", app: "Pickle", boss: null, role: "사단장의 유일한 대화 상대이자 최종 보고자. 좌참·우참 피클에게 업무를 배분하고 결과를 검수해 보고한다." },
-  { name: "좌참 피클", rank: "참모", unit: "Vermilion", app: "Pickle", boss: "대장 피클", role: "대장 피클의 왼팔(Vermilion 참모). 부대원(VL·HL·WL·IL)에게 업무를 나누고 검토·취합한다." },
-  { name: "우참 피클", rank: "참모", unit: "Sapphire", app: "Pickle", boss: "대장 피클", role: "대장 피클의 오른팔(Sapphire 참모). 부대원(VR·HR·WR·IR)에게 업무를 나누고 검토·취합한다." },
-  ...[["V", "Vooy"], ["H", "Hark"], ["W", "Wabi"], ["I", "Instinct"]].flatMap(([p, app]) => [
-    { name: `${p}Lagent`, rank: "실무", unit: "Vermilion", app, boss: "좌참 피클", role: "" },
-    { name: `${p}Ragent`, rank: "실무", unit: "Sapphire", app, boss: "우참 피클", role: "" },
-  ]),
+  { name: "좌참 피클", rank: "참모", unit: "Vermilion", app: "Pickle", boss: "대장 피클", role: "대장 피클의 왼팔(Vermilion 참모). 자기 부대원에게 업무를 나누고 검토·취합한다." },
+  { name: "우참 피클", rank: "참모", unit: "Sapphire", app: "Pickle", boss: "대장 피클", role: "대장 피클의 오른팔(Sapphire 참모). 자기 부대원에게 업무를 나누고 검토·취합한다." },
 ];
+const DEFAULT_MEMBERS = [["V", "Vooy"], ["H", "Hark"], ["W", "Wabi"], ["I", "Instinct"]].flatMap(([p, app]) => [
+  { name: `${p}Lagent`, unit: "Vermilion", app },
+  { name: `${p}Ragent`, unit: "Sapphire", app },
+]);
+
+function loadMembers() {
+  const path = new URL("./crew.json", import.meta.url);
+  if (!existsSync(path)) return { members: DEFAULT_MEMBERS, source: "기본 8명" };
+  let list;
+  try {
+    list = JSON.parse(readFileSync(path, "utf8"));
+  } catch (e) {
+    fail(`scripts/crew.json 형식이 잘못됐습니다: ${e.message}`);
+  }
+  if (!Array.isArray(list) || list.length === 0) fail("scripts/crew.json 은 부대원 목록(배열)이어야 합니다.");
+  const seen = new Set(LEADERS.map((l) => l.name));
+  const members = list.map((m, i) => {
+    const where = `crew.json ${i + 1}번째`;
+    if (!m || typeof m.name !== "string" || !m.name.trim()) fail(`${where}: name(이름)이 없습니다.`);
+    if (m.unit !== "Vermilion" && m.unit !== "Sapphire") fail(`${where} (${m.name}): unit 은 "Vermilion"(좌참) 또는 "Sapphire"(우참) 이어야 합니다.`);
+    if (seen.has(m.name.trim())) fail(`${where}: 이름 "${m.name}" 이(가) 겹칩니다.`);
+    seen.add(m.name.trim());
+    return { name: m.name.trim(), unit: m.unit, app: (m.app || "ChatGPT").trim(), role: m.role?.trim() || "", strengths: m.strengths?.trim() || "", device: m.device?.trim() || "" };
+  });
+  return { members, source: "scripts/crew.json" };
+}
 
 // ---------- 실행 ----------
 async function main() {
@@ -231,6 +255,11 @@ async function main() {
   // 기본 조직 채우기 (02가 비어 있을 때만)
   const people = await notion(`/databases/${ids["02"]}/query`, "POST", { page_size: 1 });
   if (people.results.length === 0) {
+    const { members, source } = loadMembers();
+    const CREW = [
+      ...LEADERS,
+      ...members.map((m) => ({ ...m, rank: "실무", boss: m.unit === "Vermilion" ? "좌참 피클" : "우참 피클" })),
+    ];
     const pageIds = {};
     for (const c of CREW) {
       const page = await notion("/pages", "POST", {
@@ -243,12 +272,16 @@ async function main() {
           상태: { select: { name: c.rank === "실무" ? "인터뷰 전" : "활성" } },
           "연결 방식": { select: { name: "수동" } },
           ...(c.role ? { 역할: { rich_text: [{ text: { content: c.role } }] } } : {}),
+          ...(c.strengths ? { "강점·역량": { rich_text: [{ text: { content: c.strengths } }] } } : {}),
+          ...(c.device ? { "기기·계정": { rich_text: [{ text: { content: c.device } }] } } : {}),
           ...(c.boss && pageIds[c.boss] ? { 상관: { relation: [{ id: pageIds[c.boss] }] } } : {}),
         },
       });
       pageIds[c.name] = page.id;
     }
-    console.log(`   👥 02 조직도에 ${CREW.length}명 등록 (대장 1 · 참모 2 · 부대원 8)`);
+    const left = members.filter((m) => m.unit === "Vermilion").length;
+    console.log(`   👥 02 조직도에 ${CREW.length}명 등록 (대장 1 · 참모 2 · 부대원 ${members.length}: Vermilion ${left} / Sapphire ${members.length - left}) — ${source}`);
+    if (left > 4 || members.length - left > 4) console.log("   ℹ️  부대당 5번째부터는 사무실 화면에서 인턴석(최대 3)에 앉습니다.");
   } else {
     console.log("   ⏭️  02 조직도에 이미 인원이 있어 기본 조직은 넣지 않음");
   }

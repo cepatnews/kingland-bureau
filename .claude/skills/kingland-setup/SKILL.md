@@ -23,6 +23,13 @@ git --version
 ```
 계정: GitHub, 노션(Notion), Vercel(GitHub로 가입 가능), OpenAI(ChatGPT API 키 — 결제 수단 등록 필요). 없으면 각 사이트에서 가입하라고 안내한다.
 
+## 0.5단계. 먼저 함께 정하기 (질문은 하나씩)
+1. 화면에 보일 조직 이름 (기본 `KingLand Bureau`) → 나중에 `NEXT_PUBLIC_ORG_NAME`
+2. 노션 본부 페이지 이름 (기본 `AI SForce 본부`)
+3. 부대원 구성: **A. 기본 8명**(추천) / **B. 직접 정하기** → 부대원마다 이름, 부대(`Vermilion`=좌참 / `Sapphire`=우참), 앱, 역할(선택), 잘하는 것(선택)을 차례로 묻고 `scripts/crew.json`으로 저장한다 (형식은 `scripts/crew.example.json`). 부대당 4명 이하 권장 (5번째부터는 사무실 인턴석).
+4. AI 모델 (기본 `gpt-5.5`) → `OPENAI_MODEL`
+고정된 것(지휘 구조, 부대 이름 Vermilion·Sapphire, 대장 피클·좌참 피클·우참 피클 이름)은 바꿀 수 없다고 먼저 알려 준다. 정한 내용을 표로 요약해 확인받고 진행한다.
+
 ## 1단계. 내 저장소로 코드 가져오기
 이미 이 저장소 폴더 안에서 실행 중이면 건너뛴다. 아니면:
 - GitHub CLI(`gh`)가 있으면: `gh repo create <원하는-이름> --template cepatnews/kingland-bureau --private --clone`
@@ -54,6 +61,7 @@ node -e 'const fs=require("fs");const t=fs.readFileSync(".env.local","utf8");for
 ```bash
 npm run setup:notion
 ```
+- `scripts/crew.json`이 있으면 그 부대원으로, 없으면 기본 8명으로 만든다.
 - 본부 페이지 아래에 `02 조직도 및 역할`, `04 AI 공용 업무 DB`, `05 최종 보고서 (대장 피클)`, `09 업무 보고 이력`, `10 회의실 대화`가 생기고, 02에 기본 조직 11명(대장 피클·좌참 피클·우참 피클·부대원 8)이 들어간다.
 - 여러 번 실행해도 안전하다(있는 DB는 건너뜀).
 - 오류별 대처:
