@@ -20,6 +20,22 @@ export function ReportsPanel({
   onOpenTask: (id: string) => void;
 }) {
   const [onlyUnread, setOnlyUnread] = useState(false);
+  const [making, setMaking] = useState(false);
+
+  async function makeDaily() {
+    setMaking(true);
+    try {
+      const { data } = await api<{ created: boolean; reason?: string }>("/api/cron/daily-report", { method: "POST" });
+      if (data.created) {
+        toast("오늘 일일 보고서를 만들었습니다.");
+        void finals.reload();
+      } else toast(data.reason ?? "만들 내용이 없습니다.", "err");
+    } catch (e) {
+      toast(`일일 보고 실패: ${e instanceof Error ? e.message : e}`, "err");
+    } finally {
+      setMaking(false);
+    }
+  }
   const list = (finals.data ?? []).filter((f) => !onlyUnread || !f.confirmed);
   const taskById = new Map(tasks.map((t) => [t.id, t]));
 
@@ -39,9 +55,14 @@ export function ReportsPanel({
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between px-1">
         <p className="text-xs text-muted">대장 피클 명의 종합 보고 (노션 05)</p>
-        <button onClick={() => setOnlyUnread((v) => !v)} className={`rounded-full border px-3 py-1 text-xs ${onlyUnread ? "border-[#c9a27a] bg-[#f6e4c9] text-brown-2" : "border-line bg-card text-ink-2"}`}>
-          미확인만
-        </button>
+        <div className="flex gap-1.5">
+          <button onClick={makeDaily} disabled={making} className="rounded-full border border-line bg-card px-3 py-1 text-xs text-ink-2 disabled:opacity-50">
+            {making ? "정리하는 중…" : "📑 지금 일일 보고 받기"}
+          </button>
+          <button onClick={() => setOnlyUnread((v) => !v)} className={`rounded-full border px-3 py-1 text-xs ${onlyUnread ? "border-[#c9a27a] bg-[#f6e4c9] text-brown-2" : "border-line bg-card text-ink-2"}`}>
+            미확인만
+          </button>
+        </div>
       </div>
 
       {!finals.data && finals.loading && <Empty>보고서를 불러오는 중…</Empty>}

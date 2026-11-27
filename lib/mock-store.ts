@@ -18,6 +18,18 @@ function agent(id: string, name: string, rank: Agent["rank"], unit: Agent["unit"
 type DB = { agents: Agent[]; tasks: Task[]; reports: TaskReport[]; finals: FinalReport[]; messages: ChatMessage[]; taskSeq: number; rptSeq: number };
 
 function seed(): DB {
+  // 간단 구성 시험용: SFORCE_MOCK_ORG=simple → 대장 피클 + 직속 에이전트 3 (참모 없음)
+  if (process.env.SFORCE_MOCK_ORG === "simple") {
+    return {
+      agents: [
+        agent("cmd", "대장 피클", "대장", "대장실", "Pickle", null),
+        agent("wabi", "와비", "실무", "Vermilion", "Wabi", "cmd"),
+        agent("vooy", "부이", "실무", "Vermilion", "Vooy", "cmd"),
+        agent("keyring", "키링", "실무", "Vermilion", "Keyring" as Agent["app"], "cmd"),
+      ],
+      tasks: [], reports: [], finals: [], messages: [], taskSeq: 1, rptSeq: 1,
+    };
+  }
   const agents: Agent[] = [
     agent("cmd", "대장 피클", "대장", "대장실", "Pickle", null),
     agent("left", "좌참 피클", "참모", "Vermilion", "Pickle", "cmd"),
@@ -145,6 +157,11 @@ export const mockStore: Store = {
     return clone(m);
   },
   async listFinalReports() { return clone(db().finals); },
+  async createFinalReport(input) {
+    const f: FinalReport = { id: newId("f"), title: input.title, date: input.date, type: input.type, authorIds: input.authorIds, taskIds: input.taskIds, summary: input.summary, confirmed: false, createdAt: now() };
+    db().finals.unshift(f);
+    return clone(f);
+  },
   async setFinalReportConfirmed(id, confirmed) {
     const f = db().finals.find((x) => x.id === id);
     if (!f) throw new Error("보고서를 찾을 수 없습니다.");

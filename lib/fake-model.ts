@@ -26,7 +26,7 @@ function respond(opts: LanguageModelV2CallOptions) {
 
   if (rank === "대장" && trigger.includes("사단장님 메시지")) {
     if (/안녕|누구|소개|말해봐/.test(trigger)) plan = [say("사단장님, 대장 피클입니다. 좌참·우참 피클을 지휘해 맡기신 일을 처리하고 보고드립니다.")];
-    else plan = [call("register_task", { title: `테스트 업무 ${trigger.slice(9, 30).trim()}`, doneCriteria: "사단장 지시 요약: 후보를 조사해 표로 정리하면 완료." }), call("delegate", { task: num, to: "좌참 피클", instruction: "부대원에게 나눠 처리하라." }), ...(trigger.includes("둘 다") ? [call("delegate", { task: num, to: "우참 피클", instruction: "부대원에게 나눠 처리하라." })] : []), say("사단장님, 업무로 등록하고 좌참 피클에게 넘겼습니다.")];
+    else plan = [call("register_task", { title: `테스트 업무 ${trigger.slice(9, 30).trim()}`, doneCriteria: "사단장 지시 요약: 후보를 조사해 표로 정리하면 완료." }), call("delegate", { task: num, to: subNames[0] ?? "좌참 피클", instruction: "나눠 처리하라." }), ...(trigger.includes("둘 다") && subNames[1] ? [call("delegate", { task: num, to: subNames[1], instruction: "나눠 처리하라." })] : []), say(`사단장님, 업무로 등록하고 ${subNames[0] ?? "좌참 피클"}에게 넘겼습니다.`)];
   } else if (rank === "대장") {
     plan = [call("report", { task: num, progress: 100, state: "완료", content: "좌참 보고 검토 완료. 결과 이상 없습니다." }), say("사단장님, 최종 보고 올립니다. 완료됐습니다.")];
   } else if (rank === "참모" && trigger.includes("맡겼다")) {

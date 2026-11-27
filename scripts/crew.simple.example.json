@@ -1,0 +1,8 @@
+{
+  "structure": "simple",
+  "members": [
+    { "name": "와비", "app": "Wabi", "role": "일정·생활 정리" },
+    { "name": "부이", "app": "Vooy", "role": "자료 조사" },
+    { "name": "키링", "app": "Keyring", "role": "메모·알림", "device": "키링 기기" }
+  ]
+}

@@ -23,12 +23,23 @@ git --version
 ```
 계정: GitHub, 노션(Notion), Vercel(GitHub로 가입 가능), OpenAI(ChatGPT API 키 — 결제 수단 등록 필요). 없으면 각 사이트에서 가입하라고 안내한다.
 
-## 0.5단계. 먼저 함께 정하기 (질문은 하나씩)
-1. 화면에 보일 조직 이름 (기본 `KingLand Bureau`) → 나중에 `NEXT_PUBLIC_ORG_NAME`
-2. 노션 본부 페이지 이름 (기본 `AI SForce 본부`)
-3. 부대원 구성: **A. 기본 8명**(추천) / **B. 직접 정하기** → 부대원마다 이름, 부대(`Vermilion`=좌참 / `Sapphire`=우참), 앱, 역할(선택), 잘하는 것(선택)을 차례로 묻고 `scripts/crew.json`으로 저장한다 (형식은 `scripts/crew.example.json`). 부대당 4명 이하 권장 (5번째부터는 사무실 인턴석).
-4. AI 모델 (기본 `gpt-5.5`) → `OPENAI_MODEL`
-고정된 것(지휘 구조, 부대 이름 Vermilion·Sapphire, 대장 피클·좌참 피클·우참 피클 이름)은 바꿀 수 없다고 먼저 알려 준다. 정한 내용을 표로 요약해 확인받고 진행한다.
+## 0.5단계. 먼저 함께 비서처 설계하기 (질문은 하나씩, 보기 + 추천)
+`docs/PROMPTS.md`의 STEP 1과 같은 순서로 묻는다.
+1. **기본**: 조직 이름(`NEXT_PUBLIC_ORG_NAME`, 기본 KingLand Bureau), 노션 본부 페이지 이름
+2. **구성 방식** (대장 피클은 항상 있음):
+   - **A. 간단 구성** — 참모 없이 대장 피클에게 에이전트 몇 명이 바로 보고 (예: 와비·부이·키링). 혼자 쓰거나 앱이 몇 개뿐이면 추천.
+   - **B. 풀 구성** — 대장 → 좌참·우참 피클 → 부대원.
+   흐름 한 줄씩 보여 준다. A: 사단장→대장→에이전트→대장→사단장 / B: 사단장→대장→참모→부대원→참모→대장→사단장
+3. **에이전트**: A면 몇 명인지, 한 명씩 이름·앱·역할·잘하는 것 / B면 기본 8명 그대로인지 직접 정할지(직접이면 이름·부대·앱·역할). 고정: 대장 피클·좌참 피클·우참 피클 이름, 부대 이름 Vermilion·Sapphire.
+4. **보고 형식** `REPORT_STYLE`: brief(3줄, 추천) / detailed / table — 짧은 예시와 함께
+5. **보고 받는 때** `REPORT_TIMING`: each(추천) / daily / both. daily·both면 받을 시각(한국 시간)을 묻고 `vercel.json` schedule(UTC)로 바꾼다 (18:00→`0 9 * * *`). 무료 플랜은 하루 1번·최대 1시간 지연.
+6. **기본 마감** `DEFAULT_DUE_DAYS`: 없음(추천) / 0 / 3 / 7 — 그리고 진행 기록(09 보고 이력 타임라인, 7단계 상태, 지연 표시)을 짧게 설명
+7. **AI 모델** `OPENAI_MODEL` (기본 gpt-5.5)
+
+정한 내용을 표로 요약해 확인받은 뒤:
+- 간단 구성이거나 에이전트를 직접 정했으면 `scripts/crew.json` 작성 (`{ "structure": "simple"|"full", "members": [...] }`, 예시: `scripts/crew.simple.example.json`, `scripts/crew.example.json`)
+- 운영 설정(비밀 아님)은 3단계에서 `.env.local`에 Claude가 직접 넣어도 된다: `NEXT_PUBLIC_ORG_NAME`, `OPENAI_MODEL`, `REPORT_STYLE`, `REPORT_TIMING`, `DEFAULT_DUE_DAYS`
+- daily·both면 `vercel.json`의 schedule 수정
 
 ## 1단계. 내 저장소로 코드 가져오기
 이미 이 저장소 폴더 안에서 실행 중이면 건너뛴다. 아니면:
@@ -81,9 +92,9 @@ http://localhost:3000 을 열게 하고(가능하면 Claude가 브라우저로 �
 ## 6단계. 인터넷에 배포 (Vercel)
 1. 코드를 사용자 GitHub 저장소에 올린다 (`git push`; 템플릿으로 만들었으면 이미 올라가 있음).
 2. https://vercel.com/new → 그 저장소 **Import**.
-3. **Environment Variables**에 4개를 **사용자가 직접** 넣는다: `NOTION_TOKEN`, `NOTION_ROOT_PAGE_ID`, `APP_PASSWORD`, `OPENAI_API_KEY` (필요하면 `OPENAI_MODEL`, `NEXT_PUBLIC_ORG_NAME`). **Production에 체크** 확인.
+3. **Environment Variables**에 4개를 **사용자가 직접** 넣는다: `NOTION_TOKEN`, `NOTION_ROOT_PAGE_ID`, `APP_PASSWORD`, `OPENAI_API_KEY`. 0.5단계에서 정한 운영 설정(`REPORT_STYLE`, `REPORT_TIMING`, `DEFAULT_DUE_DAYS`, `OPENAI_MODEL`, `NEXT_PUBLIC_ORG_NAME`)도 넣는다. 매일 보고면 `CRON_SECRET`(사용자가 직접 정한 긴 문자열)도. **Production에 체크** 확인.
 4. **Deploy**. 나중에 환경변수를 바꾸면 반드시 **Deployments → Redeploy** 해야 적용된다.
-5. 배포 주소(예: `https://<프로젝트>.vercel.app`)로 로그인 → 5단계와 같은 확인. 휴대폰도 같은 주소(홈 화면에 추가하면 앱처럼 쓸 수 있음).
+5. 배포 주소(예: `https://<프로젝트>.vercel.app`)로 로그인 → 5단계와 같은 확인. 매일 보고면 Vercel → Settings → Cron Jobs에 일정이 있는지, 보고서 탭 "📑 지금 일일 보고 받기"가 되는지 확인. 휴대폰도 같은 주소(홈 화면에 추가하면 앱처럼 쓸 수 있음).
 
 ## 7단계. (선택) 외부 AI 앱을 노션에 직접 연결
 에이전트별로 노션 통합을 **하나씩** 만들어(예: `Hark-HL`) 본부 페이지에 연결하고, 그 앱 설정 칸에 시크릿을 넣게 한다. 그다음 `docs/agent-instructions.md`의 지침 템플릿을 그 앱에 넣게 하고, 02 조직도 자기 행을 직접 고치게 해서 연결을 확인한다(연결 방식 = 노션 직접). 다른 AI의 지시를 거부하는 앱이면 사용자가 직접 승인 문구를 넣어야 한다.

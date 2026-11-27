@@ -1,7 +1,8 @@
 # KingLand Bureau — Claude 작업 안내
 
 노션을 유일한 원본으로 쓰는 1인용 AI 비서처 웹앱 (Next.js 15 · Vercel).
-사단장(사용자) → 대장 피클 → 좌참 피클(Vermilion)·우참 피클(Sapphire) → 부대원.
+풀 구성: 사단장(사용자) → 대장 피클 → 좌참 피클(Vermilion)·우참 피클(Sapphire) → 부대원.
+간단 구성: 사단장 → 대장 피클 → 직속 에이전트 (02 조직도에서 부대원의 `상관`이 대장 피클). 둘 다 같은 코드로 동작한다.
 
 ## 설치·배포 요청을 받으면
 `.claude/skills/kingland-setup/SKILL.md`(명령: `/kingland-setup`)를 따라 한 단계씩 진행한다.
@@ -21,5 +22,7 @@
 | `lib/agent-engine.ts` | 회의실 AI 엔진 (OpenAI 또는 Vercel AI Gateway) — 업무 등록·배정·보고·평가 |
 | `lib/chain-of-command.ts` | 지휘·보고 규칙 (한 곳에만) |
 | `lib/office-scene.ts` · `components/office-view.tsx` | 실시간 사무실 (3D/평면/도면) |
-| `lib/track-record.ts` | 참모 평가 누적 → 잘하는 분야 배정 |
+| `lib/track-record.ts` | 평가 누적(참모 또는 간단 구성의 대장) → 잘하는 분야 배정 |
+| `lib/settings.ts` | 운영 설정: `REPORT_STYLE`·`REPORT_TIMING`·`DEFAULT_DUE_DAYS` |
+| `lib/daily-report.ts` · `app/api/cron/daily-report` · `vercel.json` | 일일 보고서(05) — Vercel Cron(CRON_SECRET) 또는 보고서 탭 버튼 |
 | `lib/mock-store.ts` · `lib/fake-model.ts` | 노션·AI 없이 개발할 때의 목업 |

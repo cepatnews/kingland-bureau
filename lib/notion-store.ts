@@ -420,6 +420,24 @@ export const notionStore = {
     return pages.map(toFinalReport);
   },
 
+  async createFinalReport(input: { title: string; date: string; type: "일일" | "주간" | "긴급"; authorIds: string[]; taskIds: string[]; summary: string }): Promise<FinalReport> {
+    const page = await notion<Page>(`/pages`, {
+      method: "POST",
+      body: {
+        parent: { database_id: await DB.reports() },
+        properties: {
+          보고서명: w.title(input.title),
+          보고일: w.date(input.date),
+          "보고 유형": w.select(input.type),
+          "작성 AI": w.relation(input.authorIds),
+          "관련 업무": w.relation(input.taskIds.slice(0, 100)),
+          요약: w.text(input.summary),
+        },
+      },
+    });
+    return toFinalReport(page);
+  },
+
   async setFinalReportConfirmed(id: string, confirmed: boolean): Promise<FinalReport> {
     const page = await notion<Page>(`/pages/${id}`, {
       method: "PATCH",

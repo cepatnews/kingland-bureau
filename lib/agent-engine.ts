@@ -12,6 +12,7 @@ import { store } from "./data-source";
 import { WORK_FIELDS, buildTrackRecord, describeRecord, formatEvaluation, type Evaluation, type FieldStat } from "./track-record";
 import { MEETING_ROOM, TASK_STATES, type Agent, type ChatMessage, type Task, type TaskReport, type TaskState } from "./types";
 import { ORG_NAME } from "./brand";
+import { DEFAULT_DUE_DAYS, REPORT_STYLE, REPORT_STYLE_GUIDE, REPORT_TIMING, kstDate } from "./settings";
 
 const openaiOn = () => Boolean(process.env.OPENAI_API_KEY);
 const OPENAI_MODEL = process.env.OPENAI_MODEL?.trim() || "gpt-5.5";
@@ -25,7 +26,7 @@ export function aiReady(): boolean {
   return Boolean(process.env.OPENAI_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.VERCEL || fakeOn());
 }
 
-async function model() {
+export async function model() {
   if (fakeOn()) return (await import("./fake-model")).fakeModel();
   return openaiOn() ? openai(OPENAI_MODEL) : gateway(GATEWAY_MODEL);
 }
@@ -70,7 +71,7 @@ async function agentTurn(room: string, job: Job): Promise<Job[]> {
   const caller = agents.find((a) => a.id === job.agentId);
   const record =
     caller && (caller.rank === "대장" || caller.rank === "참모")
-      ? buildTrackRecord(await s.listTaskReports({ stage: "참모 검토·취합" }).catch(() => []))
+      ? buildTrackRecord(await s.listTaskReports({}).catch(() => []))
       : new Map<string, FieldStat[]>();
   const org = buildOrg(agents);
   const me = org.byId.get(job.agentId);
@@ -115,6 +116,7 @@ function buildTools(org: Org, me: Agent, tasks: Task[], next: Job[], notices: { 
     return tasks.find((t) => t.id === ref || (num && t.code && t.code.match(/\d+/)?.[0] === num)) ?? null;
   };
   const subs = subordinatesOf([...org.byId.values()], me.id).filter((a) => a.state !== "중지");
+  const hasFieldSubs = subs.some((a) => a.rank === "실무"); // 간단 구성: 대장 바로 아래 부대원
   const label = (t: Task) => `${t.code ? `#${t.code.match(/\d+/)?.[0] ?? t.code} ` : ""}${t.title}`;
   const findAgent = (name: string) => {
     const n = name.replace(/\s/g, "");
@@ -131,7 +133,8 @@ function buildTools(org: Org, me: Agent, tasks: Task[], next: Job[], notices: { 
         due: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("마감일 YYYY-MM-DD"),
       }),
       execute: async ({ title, doneCriteria, priority, due }) => {
-        const t = await s.createTask({ title, doneCriteria, priority, due: due ?? null, ...directOrderRouting(org, me.id) });
+        const dueDate = due ?? (DEFAULT_DUE_DAYS != null ? kstDate(DEFAULT_DUE_DAYS) : null);
+        const t = await s.createTask({ title, doneCriteria, priority, due: dueDate, ...directOrderRouting(org, me.id) });
         tasks.unshift(t);
         notices.push({ kind: "지시", text: `📌 업무 등록: ${label(t)}`, taskIds: [t.id] });
         return { ok: true, task: label(t) };
@@ -141,7 +144,7 @@ function buildTools(org: Org, me: Agent, tasks: Task[], next: Job[], notices: { 
     report: tool({
       description:
         me.rank === "실무"
-          ? "맡은 업무의 작업 결과를 상관(참모)에게 보고한다. 결과물 본문을 content에 빠짐없이 담는다."
+          ? "맡은 업무의 작업 결과를 상관(참모 또는 대장)에게 보고한다. 결과물 본문을 content에 빠짐없이 담는다."
           : me.rank === "참모"
             ? "부대원 결과를 검토·취합해 대장 피클에게 보고한다."
             : "업무 결과를 사단장님께 최종 보고한다.",
@@ -151,9 +154,9 @@ function buildTools(org: Org, me: Agent, tasks: Task[], next: Job[], notices: { 
         state: z.enum(TASK_STATES).describe("업무 상태"),
         content: z.string().min(2).max(6000).describe("보고 내용 (결과물 포함)"),
         resultUrl: z.string().url().optional(),
-        ...(me.rank === "참모"
+        ...(me.rank === "참모" ? { staffReview: z.enum(["승인", "보완 요청"]).describe("부대원 결과 검토") } : {}),
+        ...(me.rank === "참모" || (me.rank === "대장" && hasFieldSubs)
           ? {
-              staffReview: z.enum(["승인", "보완 요청"]).describe("부대원 결과 검토"),
               evaluations: z
                 .array(
                   z.object({
@@ -259,10 +262,13 @@ function buildTools(org: Org, me: Agent, tasks: Task[], next: Job[], notices: { 
 function persona(org: Org, me: Agent, agents: Agent[], record: Map<string, FieldStat[]>): string {
   const boss = superiorOf(org, me.id);
   const subs = subordinatesOf(agents, me.id).filter((a) => a.state !== "중지");
+  const commanderField = org.commander ? subordinatesOf(agents, org.commander.id).filter((a) => a.rank === "실무" && a.state !== "중지") : [];
   const today = new Date().toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric", weekday: "short" });
   const lines = [
     `너는 ${ORG_NAME}(사단장 전용 비서처)의 「${me.name}」이다. 계급 ${me.rank ?? "-"}, 소속 ${me.unit ?? "-"}.`,
-    `${ORG_NAME}는 사단장님 한 사람을 위한 AI 조직이다. 지휘 계통: 사단장 → 대장 피클 → 좌참 피클(Vermilion 부대)·우참 피클(Sapphire 부대) → 부대원.`,
+    org.staff.length
+      ? `${ORG_NAME}는 사단장님 한 사람을 위한 AI 조직이다. 지휘 계통: 사단장 → 대장 피클 → ${org.staff.map((a) => `${a.name}(${a.unit} 부대)`).join("·")} → 부대원${commanderField.length ? ` (대장 직속 부대원도 있음: ${commanderField.map((a) => a.name).join(", ")})` : ""}.`
+      : `${ORG_NAME}는 사단장님 한 사람을 위한 AI 조직이다. 지휘 계통: 사단장 → 대장 피클 → 직속 에이전트(${commanderField.map((a) => a.name).join(", ") || "없음"}). 참모 없이 대장이 바로 일을 나눈다.`,
     `오늘: ${today} (한국 시간)`,
     me.role && `역할: ${me.role}`,
     me.strengths && `강점·역량: ${me.strengths}`,
@@ -290,13 +296,34 @@ function persona(org: Org, me: Agent, agents: Agent[], record: Map<string, Field
     "■ 일하는 방식",
   ];
   if (me.rank === "대장") {
+    const directField = subs.filter((a) => a.rank === "실무");
+    lines.push("- 사단장님의 유일한 공식 대화 상대다. 질문·잡담에는 바로 답한다.");
+    if (org.staff.length)
+      lines.push(
+        "- 일을 맡기시면 register_task로 등록하고, 성격에 맞는 참모에게 delegate로 넘긴다. 참모 소속 부대원에게는 직접 지시하지 않는다.",
+        "- 참모를 고를 때 부대원 실적을 본다. 그 분야에 ★ 부대원이 있는 부대의 참모에게 우선 맡기고, 없으면 일의 성격과 부대 균형으로 정한다.",
+        "- 같은 업무를 두 참모에게 맡겼다면 둘 다 보고할 때까지 기다린다. 아직 남았으면 report하지 말고 '○○ 보고 대기 중'이라고만 짧게 말한다.",
+      );
+    if (directField.length)
+      lines.push(
+        `- 직속 에이전트(${directField.map((a) => a.name).join(", ")})에게는 참모 없이 직접 delegate로 맡긴다. 일을 맡기시면 register_task로 등록한 뒤 성격에 맞는 에이전트에게 넘긴다.`,
+        "- 배정 원칙 (실적 기준): 그 분야에 ★ 에이전트가 있으면 그에게, 평가가 부족하면 2명에게 같은 일을 각각 맡겨 비교, 평균 2.5점 미만인 분야는 다시 맡기지 않는다.",
+        "- 맡긴 에이전트가 모두 보고할 때까지 기다린다. 보고 내용은 '보고 원문' 섹션을 기준으로 검토하고, 최종 report를 올릴 때 evaluations에 맡았던 에이전트 각각의 분야·점수(1~5)·한 줄 평을 남긴다.",
+      );
     lines.push(
-      "- 사단장님의 유일한 공식 대화 상대다. 질문·잡담에는 바로 답한다.",
-      "- 일을 맡기시면 register_task로 등록하고, 성격에 맞는 참모(좌참 피클 또는 우참 피클)에게 delegate로 넘긴다. 부대원에게 직접 지시하지 않는다.",
-      "- 참모를 고를 때 부대원 실적을 본다. 그 분야에 ★ 부대원이 있는 부대의 참모에게 우선 맡기고, 둘 다 없으면 일의 성격과 부대 균형으로 정한다.",
       "- 아주 간단한 일(짧은 답·정리)은 직접 처리해도 된다. 이때도 등록한 업무라면 report로 마무리한다.",
-      "- 참모 보고가 올라오면 '보고 원문'을 검토하고 report로 사단장님께 최종 보고한다. 보완이 필요하면 다시 delegate한다.",
-      "- 같은 업무를 좌참·우참 둘 다에게 맡겼다면 두 참모가 모두 보고할 때까지 기다린다. 아직 남았으면 report하지 말고 '○○ 보고 대기 중'이라고만 짧게 말한다.",
+      "- 아래 보고가 올라오면 '보고 원문'을 검토하고 report로 사단장님께 최종 보고한다. 보완이 필요하면 다시 delegate한다.",
+      "",
+      "■ 사단장님께 보고하는 방식",
+      `- 형식: ${REPORT_STYLE_GUIDE[REPORT_STYLE]}`,
+      REPORT_TIMING === "daily"
+        ? "- 시점: 사단장님은 매일 한 번 정리 보고(일일 보고서)를 받기로 했다. 업무가 끝나도 회의실에는 한 줄로만 알리고, 자세한 정리는 일일 보고서에 모인다."
+        : REPORT_TIMING === "both"
+          ? "- 시점: 업무가 끝날 때마다 바로 보고하고, 매일 한 번 일일 보고서로도 정리된다."
+          : "- 시점: 업무가 끝날 때마다 바로 보고한다.",
+      DEFAULT_DUE_DAYS != null
+        ? `- 마감: 사단장님이 마감을 말하지 않으면 기본 ${DEFAULT_DUE_DAYS === 0 ? "당일" : `${DEFAULT_DUE_DAYS}일 뒤`}로 잡힌다. 급하거나 오래 걸리는 일이면 due를 직접 정한다.`
+        : "- 마감: 사단장님이 말한 마감이 있으면 due로 넣는다.",
     );
   } else if (me.rank === "참모") {
     lines.push(
@@ -314,7 +341,7 @@ function persona(org: Org, me: Agent, agents: Agent[], record: Map<string, Field
   } else {
     lines.push(
       "- 맡은 일을 실제로 수행한다. 사실 확인·최신 정보가 필요하면 web_search를 쓴다.",
-      "- 끝나면 report로 상관(참모)에게 보고한다. 결과물 전체를 content에 담는다.",
+      "- 끝나면 report로 상관에게 보고한다. 결과물 전체를 content에 담는다.",
       "- 사단장님이 직접 일을 주시면 register_task로 등록한 뒤 수행하고 보고한다.",
     );
   }
@@ -341,14 +368,18 @@ function formatHistory(history: ChatMessage[]): string {
 
 /** 참모는 부대원 실무 보고, 대장은 참모 검토·취합 보고의 원문을 받는다 (업무·보고자별 최신 1건). */
 async function incomingReports(org: Org, me: Agent, open: Task[]): Promise<string> {
-  const stage = me.rank === "참모" ? "실무 보고" : me.rank === "대장" ? "참모 검토·취합" : null;
-  if (!stage || !open.length) return "";
+  if ((me.rank !== "참모" && me.rank !== "대장") || !open.length) return "";
   const s = store();
-  const lists = await Promise.all(open.slice(0, 6).map((t) => s.listTaskReports({ taskId: t.id, stage }).catch(() => [] as TaskReport[])));
+  // 참모: 자기 부대원의 실무 보고 / 대장: 참모 취합 보고 + 직속 부대원의 실무 보고(간단 구성)
+  const wanted = (r: TaskReport) =>
+    me.rank === "참모"
+      ? r.stage === "실무 보고"
+      : r.stage === "참모 검토·취합" || (r.stage === "실무 보고" && r.reporterIds.some((id) => superiorOf(org, id)?.id === me.id));
+  const lists = await Promise.all(open.slice(0, 6).map((t) => s.listTaskReports({ taskId: t.id }).then((l) => l.filter(wanted)).catch(() => [] as TaskReport[])));
   const out: string[] = [];
   open.slice(0, 6).forEach((t, i) => {
     const latest = new Map<string, TaskReport>();
-    for (const r of lists[i]) for (const id of r.reporterIds) if (me.rank === "대장" || superiorOf(org, id)?.id === me.id) latest.set(id, r);
+    for (const r of lists[i]) for (const id of r.reporterIds) if (superiorOf(org, id)?.id === me.id) latest.set(id, r);
     for (const [id, r] of latest) {
       const body = r.content.length > 1500 ? `${r.content.slice(0, 1500)}…` : r.content;
       out.push(`- #${t.code?.match(/\d+/)?.[0] ?? "?"} ${org.byId.get(id)?.name ?? "?"} (${r.state ?? "-"}):\n${body}`);

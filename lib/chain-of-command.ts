@@ -80,7 +80,11 @@ export function tasksOf(org: Org, agentId: string, tasks: Task[]): Task[] {
 /** 화면용 그룹: 대장실 / Vermilion(좌참) / Sapphire(우참) (각 참모 → 부대원 순) */
 export function commandGroups(org: Org, agents: Agent[]): { label: string; members: { agent: Agent; depth: 0 | 1 }[] }[] {
   const groups: { label: string; members: { agent: Agent; depth: 0 | 1 }[] }[] = [];
-  if (org.commander) groups.push({ label: "대장실", members: [{ agent: org.commander, depth: 0 }] });
+  if (org.commander) {
+    // 간단 구성이면 대장 바로 아래 부대원도 대장실 묶음에 보인다
+    const direct = subordinatesOf(agents, org.commander.id).filter((a) => a.rank === "실무");
+    groups.push({ label: "대장실", members: [{ agent: org.commander, depth: 0 }, ...direct.map((m) => ({ agent: m, depth: 1 as const }))] });
+  }
   for (const s of org.staff) {
     groups.push({
       label: s.unit ?? s.name,
@@ -103,7 +107,9 @@ export function validateReporter(
   if (stage === "실무 보고") {
     if (reporter.rank !== "실무") return { ok: false, error: "실무 보고는 실무 AI만 올릴 수 있습니다." };
     const boss = superiorOf(org, reporterId);
-    if (!boss || boss.rank !== "참모") return { ok: false, error: `${reporter.name}의 상관(참모)이 지정돼 있지 않습니다.` };
+    // 간단 구성: 참모 없이 대장에게 바로 보고
+    if (boss && boss.rank === "대장") return { ok: true, recipient: "대장 피클" };
+    if (!boss || boss.rank !== "참모") return { ok: false, error: `${reporter.name}의 상관(참모 또는 대장)이 지정돼 있지 않습니다.` };
     if (task.staffIds.length && !task.staffIds.includes(boss.id))
       return { ok: false, error: `${reporter.name}은(는) 이 업무의 담당 참모 소속이 아닙니다.` };
     return { ok: true, recipient: staffRecipient(boss) };
@@ -164,13 +170,17 @@ export function isDelayed(task: Task, today = new Date()): boolean {
  * 문제가 있으면 에이전트에게 돌려줄 오류 문구, 없으면 null.
  */
 export function completionGate(org: Org, me: Agent, t: Task, reports: TaskReport[]): string | null {
-  const lowerStage = me.rank === "참모" ? "실무 보고" : "참모 검토·취합";
   const myStage = me.rank === "참모" ? "참모 검토·취합" : "대장 최종 보고";
+  // 이 업무를 맡은 바로 아래 인원: 참모 → 자기 부대원 / 대장 → 담당 참모 + 직속 부대원(간단 구성)
   const expected =
     me.rank === "참모"
       ? t.assigneeIds.filter((id) => org.byId.get(id)?.rank === "실무" && superiorOf(org, id)?.id === me.id)
-      : t.staffIds.filter((id) => org.byId.get(id)?.rank === "참모");
-  const lower = reports.filter((r) => r.stage === lowerStage);
+      : [
+          ...t.staffIds.filter((id) => org.byId.get(id)?.rank === "참모"),
+          ...t.assigneeIds.filter((id) => org.byId.get(id)?.rank === "실무" && superiorOf(org, id)?.id === me.id),
+        ];
+  const stageOf = (id: string) => (org.byId.get(id)?.rank === "참모" ? "참모 검토·취합" : "실무 보고");
+  const lower = reports.filter((r) => r.reporterIds.some((id) => expected.includes(id) && r.stage === stageOf(id)));
   const missing = expected.filter((id) => !lower.some((r) => r.reporterIds.includes(id)));
   if (missing.length)
     return `아직 보고하지 않은 인원이 있습니다: ${missing.map((id) => org.byId.get(id)?.name ?? "?").join(", ")}. 완료 보고하지 말고 기다린다고만 말하세요.`;

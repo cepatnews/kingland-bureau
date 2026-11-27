@@ -31,6 +31,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Vercel Cron: CRON_SECRET (일일 보고)
+  const cronSecret = process.env.CRON_SECRET;
+  if (pathname.startsWith("/api/cron/") && cronSecret && req.headers.get("authorization") === `Bearer ${cronSecret}`) {
+    return NextResponse.next();
+  }
+
   // 에이전트: Bearer 키 (API 경로만)
   const agentKey = process.env.AGENT_API_KEY;
   const auth = req.headers.get("authorization");
